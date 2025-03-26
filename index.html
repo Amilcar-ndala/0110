@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows.Musik</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: black;
+            color: white;
+            overflow-x: hidden;
+        }
+        header {
+            display: flex;
+            height: 34px;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: linear-gradient(to right, black, darkblue, violet);
+            position: relative;
+        }
+        .search-header {
+            display: none;
+            position: absolute;
+            top: 100%;
+            transform: translateY(-30%);
+            background-color: black;
+            margin-top: 5px;
+            border-radius: 30px;
+            width: 100%;
+        }
+        .search-header input {
+            background: none;
+            border: 1px solid white;
+            color: white;
+            padding: 5px;
+            border-radius: 30px;
+            outline: none;
+            width: 100%;
+            height: 45px;
+        }
+        .content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .media-item {
+            width: 38%;
+            border-radius: 5px;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .media-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .media-item img:hover {
+            transform: scale(1.1);
+        }
+        .media-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .media-info h3 {
+            font-size: 16px;
+            margin: 0;
+        }
+        .media-info audio {
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: linear-gradient(to left, black, darkblue, violet);
+            padding: 10px 20px;
+        }
+        footer button {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .upload-container {
+            display: none;
+            gap: 10px;
+        }
+        .search-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .search-container svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h3>Windows Musik</h3>
+       
+        <div class="search-header">
+            <input type="text" id="search-input" placeholder="Pesquisar música...">
+        </div>
+    </header>
+
+    <div class="content" id="music-list"></div>
+
+    <footer>
+        <button>&#8962;</button>
+        <button id="upload-btn" style="transform: translateX(-110px);">+</button>
+        <div class="upload-container" id="upload-container">
+            <label for="file-upload-music">&#127911;</label>
+            <input type="file" id="file-upload-music" accept="audio/*" style="display: none;">
+            <label for="file-upload-image">&#128247;</label>
+            <input type="file" id="file-upload-image" accept="image/*" style="display: none;">
+        </div>
+         <div class="search-container" id="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path d="M21.53 20.47l-4.56-4.56a9 9 0 1 0-1.06 1.06l4.56 4.56a.75.75 0 0 0 1.06-1.06zM10.5 18a7.5 7.5 0 1 1 7.5-7.5 7.51 7.51 0 0 1-7.5 7.5z"/>
+            </svg>
+        </div>
+        <button style="transform: translateX(-50px);">&#128100;</button>
+    </footer>
+
+    <script>
+        const fileUploadMusic = document.getElementById('file-upload-music');
+        const fileUploadImage = document.getElementById('file-upload-image');
+        const uploadBtn = document.getElementById('upload-btn');
+        const uploadContainer = document.getElementById('upload-container');
+        const musicList = document.getElementById('music-list');
+        const searchInput = document.getElementById('search-input');
+        const searchIcon = document.getElementById('search-icon');
+        const searchHeader = document.querySelector('.search-header');
+        let musicArray = [];
+        let currentAudio = null;
+
+        uploadBtn.addEventListener('click', () => {
+            uploadContainer.style.display = uploadContainer.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        fileUploadMusic.addEventListener('change', () => {
+            fileUploadImage.click();
+        });
+
+        fileUploadImage.addEventListener('change', () => {
+            const musicFile = fileUploadMusic.files[0];
+            const imageFile = fileUploadImage.files[0];
+
+            if (musicFile && imageFile) {
+                const musicData = {
+                    name: musicFile.name.replace(/\.[^/.]+$/, ""),
+                    musicURL: URL.createObjectURL(musicFile),
+                    imageURL: URL.createObjectURL(imageFile),
+                    type: musicFile.type
+                };
+                musicArray.push(musicData);
+                renderMusicList();
+            }
+        });
+
+        function renderMusicList() {
+            musicList.innerHTML = "";
+            musicArray.forEach((music, index) => {
+                const mediaItem = document.createElement('div');
+                mediaItem.classList.add('media-item');
+                mediaItem.setAttribute('data-name', music.name.toLowerCase());
+                mediaItem.innerHTML = `
+                    <img src="${music.imageURL}" alt="Capa da música">
+                    <div class="media-info">
+                        <h5>${music.name}</h5>
+                        <audio controls data-index="${index}">
+                            <source src="${music.musicURL}" type="${music.type}">
+                        </audio>
+                    </div>
+                `;
+                musicList.appendChild(mediaItem);
+            });
+
+            document.querySelectorAll('audio').forEach(audio => {
+                audio.addEventListener('play', function () {
+                    if (currentAudio && currentAudio !== this) {
+                        currentAudio.pause();
+                        currentAudio.currentTime = 0;
+                    }
+                    currentAudio = this;
+                });
+
+                audio.addEventListener('ended', function () {
+                    playRandomMusic();
+                });
+            });
+        }
+
+        function playRandomMusic() {
+            if (musicArray.length > 0) {
+                let randomIndex = Math.floor(Math.random() * musicArray.length);
+                let audioElements = document.querySelectorAll('audio');
+                if (audioElements[randomIndex]) {
+                    audioElements[randomIndex].play();
+                }
+            }
+        }
+
+        // Exibir campo de pesquisa ao clicar na lupa
+        searchIcon.addEventListener('click', () => {
+            searchHeader.style.display = searchHeader.style.display === 'none' ? 'block' : 'none';
+            searchInput.focus();
+        });
+
+        // Filtragem das músicas
+        searchInput.addEventListener('input', function () {
+            const searchTerm = searchInput.value.toLowerCase();
+            document.querySelectorAll('.media-item').forEach(item => {
+                const musicName = item.getAttribute('data-name');
+                item.style.display = musicName.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

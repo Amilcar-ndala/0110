@@ -1,0 +1,12 @@
+[
+    {
+        "name": "Nome_da_Musica",
+        "musicURL": "uploads/music_123456789.mp3",
+        "imageURL": "uploads/image_987654321.jpg"
+    },
+    {
+        "name": "Outra_Musica",
+        "musicURL": "uploads/music_223344556.mp3",
+        "imageURL": "uploads/image_556677889.jpg"
+    }
+]
